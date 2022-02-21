@@ -18,14 +18,20 @@ def move_to(point):
     return True
 
 
-def find_angle(tan_theta):
+def find_quadr(dest, source):
+
+
+
+def find_angle(tan_theta, quadr):
+
+
 
     return 0
 
 
 def get_position(angle, distance):
 
-    gun_at_screen = [None, None]
+    gun_at_screen = [SCREEN_WIDTH/2, SCREEN_HEIGHT/2]
     mult_factor = 100
 
     gun_at_screen[0] += distance * math.cos(angle) * mult_factor
