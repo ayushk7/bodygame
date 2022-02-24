@@ -1,15 +1,18 @@
 import math
+from tkinter.messagebox import NO
+from typing import List
 import pyautogui
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 900
 
-GUN_ENGAGE_ANGLE = 140
+GUN_ENGAGE_ANGLE = 200
 
 ORIGIN = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
 
+
 # class gun_stat:
-#     def __init__(self):
+#     def _init_(self):
 #         self.prev_wrist
 #         self.prev_tip
 #         self.curr_wrist
@@ -78,40 +81,60 @@ def get_distance(x1, y1, x2, y2):
 
 
 def gun_logic(gun_stat):
-
     if gun_stat.prev_tip is None or gun_stat.curr_tip is None:
         return
 
-    prev_angle = math.degrees(find_angle((gun_stat.prev_tip[1] - gun_stat.prev_wrist[1]) / (gun_stat.prev_tip[0] - gun_stat.prev_wrist[0]), find_quadr(gun_stat.prev_tip, gun_stat.prev_wrist)))
-    current_angle = math.degrees(find_angle((gun_stat.curr_tip[1] - gun_stat.curr_wrist[1]) / (gun_stat.curr_tip[0] - gun_stat.curr_wrist[0]), find_quadr(gun_stat.curr_tip, gun_stat.curr_wrist)))
+    # print(type(gun_stat.prev_wrist))
 
-    prev_engage = prev_angle > GUN_ENGAGE_ANGLE
-    current_engage = current_angle > GUN_ENGAGE_ANGLE
+    if isinstance(gun_stat.prev_tip, List):
+        return
 
-    print("PREVIOUS ANGLE", prev_angle, "CURRENT ANGLE", current_angle)
+    # print(gun_stat.prev_tip)
+    # making into lists
+    # gun_stat.prev_tip = [gun_stat.prev_tip.x, gun_stat.prev_tip.y]
+    # gun_stat.prev_wrist = [gun_stat.prev_wrist.x, gun_stat.prev_wrist.y]
+    gun_stat.curr_tip = [gun_stat.curr_tip.x, gun_stat.curr_tip.y]
+    gun_stat.curr_wrist = [gun_stat.curr_wrist.x, gun_stat.curr_wrist.y]
+
+    # prev_angle = math.degrees(
+    #     find_angle((gun_stat.prev_tip[1] - gun_stat.prev_wrist[1]) / (gun_stat.prev_tip[0] - gun_stat.prev_wrist[0]),
+    #                find_quadr(gun_stat.prev_tip, gun_stat.prev_wrist)))
+    current_angle = math.degrees(
+        find_angle((gun_stat.curr_tip[1] - gun_stat.curr_wrist[1]) / (gun_stat.curr_tip[0] - gun_stat.curr_wrist[0]),
+                   find_quadr(gun_stat.curr_tip, gun_stat.curr_wrist)))
+
+    prev_engage = gun_stat.prev_engage
+    current_engage = current_angle < GUN_ENGAGE_ANGLE
+
+    print("PREVIOUS CONDITION", gun_stat.prev_engage, "CURRENT ANGLE", current_angle)
 
     if prev_engage is True and current_engage is False:
-        print("DISENGAGE")
-        pyautogui.mouseUp()
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>DISENGAGE")
+        # pyautogui.mouseUp()
+        return 'DISENGAGE'
 
     if prev_engage is False and current_engage is True:
-        print("ENGAGE")
-        pyautogui.mouseDown()
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>ENGAGE")
+        # pyautogui.mouseDown()
+        return 'ENGAGE'
 
-
-
+    return 'NOCHANGE'
 
 
 def controller(landmarks, gun_stat):
     # find all the landmarks
-    left_shoulder = landmarks[0]
-    right_shoulder = landmarks[1]
-    gun = landmarks[2]
+    left_shoulder = [landmarks[0].x, landmarks[0].y]
+    right_shoulder = [landmarks[1].x, landmarks[1].y]
+    gun = [landmarks[2].x, landmarks[2].y]
+
+    # print("Previous wrist", gun_stat.prev_wrist)
+    # if gun_stat.prev_wrist is not None and gun_stat.curr_wrist is not None:
+    #     gun_stat.prev_wrist = [gun_stat.prev_wrist.x, gun_stat.prev_wrist.y]
+    #     gun_stat.curr_wrist = [gun_stat.curr_wrist.x, gun_stat.curr_wrist.y]
 
     # gun_stat
     # wrist = gun_stat[0]
     # tip = gun_stat[1]
-
 
     neck_center = [None, None]
 
@@ -127,4 +150,5 @@ def controller(landmarks, gun_stat):
 
     gun_at_screen = get_position(angle, distance)
 
-    return move_to(gun_at_screen)
+    move_to(gun_at_screen)
+    gun_logic(gun_stat)
