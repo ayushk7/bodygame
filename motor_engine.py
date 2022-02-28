@@ -1,10 +1,12 @@
 import math
 from tkinter.messagebox import NO
 from typing import List
+from matplotlib.pyplot import pink
 import pyautogui
 
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+MULT_FACTOR = 4100
 
 GUN_ENGAGE_ANGLE = 200
 
@@ -21,8 +23,19 @@ ORIGIN = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
 
 def move_to(point):
     try:
-        # pyautogui.moveTo(point)
-        pass
+
+        if 0 <= point[0] <= SCREEN_WIDTH and 0 <= point[1] <= SCREEN_HEIGHT:
+
+
+            pyautogui.moveTo(point[0], point[1])
+            print("Point", point)
+            pass
+
+        else:
+            
+            pyautogui.moveTo(ORIGIN)
+            print("was not in range so made it to center {{{{{{{{{{{{}}}}}}}}}}}}}")
+
     except:
         return False
 
@@ -65,9 +78,9 @@ def find_angle(tan_theta, quadr):
 
 def get_position(angle, distance):
     gun_at_screen = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
-    mult_factor = 100
+    mult_factor = MULT_FACTOR
 
-    gun_at_screen[0] += distance * math.cos(angle) * mult_factor
+    gun_at_screen[0] -= distance * math.cos(angle) * mult_factor
 
     gun_at_screen[1] += distance * math.sin(angle) * mult_factor
 
@@ -82,12 +95,12 @@ def get_distance(x1, y1, x2, y2):
 
 def gun_logic(gun_stat):
     if gun_stat.prev_tip is None or gun_stat.curr_tip is None:
-        return
+        return 'NOCHANGE'
 
     # print(type(gun_stat.prev_wrist))
 
     if isinstance(gun_stat.prev_tip, List):
-        return
+        return 'NOCHANGE'
 
     # print(gun_stat.prev_tip)
     # making into lists
@@ -150,5 +163,9 @@ def controller(landmarks, gun_stat):
 
     gun_at_screen = get_position(angle, distance)
 
-    move_to(gun_at_screen)
-    gun_logic(gun_stat)
+    replies = []
+
+    replies.append(move_to(gun_at_screen))
+    replies.append(gun_logic(gun_stat))
+
+    return replies
